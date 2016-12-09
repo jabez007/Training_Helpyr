@@ -1,0 +1,116 @@
+import pypyodbc
+
+import Log
+
+
+class TrnPhonebook:
+    # cephonebookdev-sql.epic.com
+    # CE_Phonebook_TRN
+
+    def __init__(self):
+        self.conn = pypyodbc.connect('Driver={SQL Server};Server=cephonebooktrn-sql;database=CE_Phonebook_TRN')
+
+    def reset(self):
+        update_phonebook = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]"
+        where_orgid = "WHERE OrgID > 99"
+
+        sql_default = "{0} SET status = 4 WHERE OrgType IN (4, 10)\
+                       {0} SET QueryPhone = NULL {1}\
+                       {0} SET QueryEmail = NULL {1}\
+                       {0} SET QueryHours = NULL {1}\
+                       {0} SET AuditPhone = NULL {1}\
+                       {0} SET AuditEmail = NULL {1}\
+                       {0} SET ITPhone = NULL {1}\
+                       {0} SET ITEmail = NULL {1}\
+                       {0} SET AuthText = ' ' {1}\
+                       {0} SET ContactInfoType = NULL {1}\
+                       {0} SET ContactInfoPhone = NULL {1}\
+                       {0} SET ContactInfoIntlPhone = NULL {1}\
+                       {0} SET QueryInstructions = NULL {1}\
+                       {0} SET PPOCDefaultDays = NULL {1}\
+                       {0} SET PPOCOrgDays = NULL {1}\
+                       {0} SET PPOCOrgs = NULL {1}\
+                       {0} SET GoLive = '8173353600' {1}".format(update_phonebook, where_orgid)
+
+        where_active_and_orgid = "WHERE status = 1 AND OrgID > 99"
+
+        sql_reset_address = "{0} SET Address = concat(substring(URL,12,2),' Main Street') {1} AND OrgID<10000\
+                             {0} SET Address = concat(substring(URL,12,3),' Main Street') where status=1 and OrgID>9999\
+                             {0} SET CareEverywhereCountry = 1 {1}\
+                             {0} SET City = 'Verona' {1}\
+                             {0} SET State = '50 Wisconsin WI' {1}\
+                             {0} SET StateName = 'Wisconsin' {1}\
+                             {0} SET Zip = '53593' {1}\
+                             {0} SET Country = 'United States of America' {1}\
+                             \
+                             {0} SET DisplayAddress = CONCAT(Address,CHAR(0x5),City,' WI ',Zip,CHAR(0x5),Country) {1}\
+                            ".format(update_phonebook, where_active_and_orgid)
+        
+        sql_reset_name = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
+                           SET OrgName = concat(substring(URL, 9, 5), ' Health System')\
+                           WHERE status = 1 AND OrgID < 10000 AND OrgID > 99\
+                          UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
+                           SET OrgName = concat(substring(URL, 9, 6), ' Health System')\
+                           WHERE status = 1 AND OrgID > 9999"
+        
+        return self.try_sql(sql_default) and self.try_sql(sql_reset_address) and self.try_sql(sql_reset_name)
+
+    def instructor(self, cache):
+        sql_instructor = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook] SET OrgName = 'Instructor Health System'\
+                           WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
+        return self.try_sql(sql_instructor) and self.register(cache)
+
+    def register(self, cache):
+        sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
+                        SET GoLive = '5499187200'\
+                        WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
+        return self.try_sql(sql_register)
+
+    def register_gwn(self, cache):
+        old_interconnect = self.get_interconnect(72)
+
+        sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
+                         SET GoLive='5499187200', UrlValue=REPLACE(UrlValue,'%s','Interconnect-train%s')\
+                         WHERE status = 1 AND OrgID = 72" % (old_interconnect, cache)
+
+        return self.try_sql(sql_register)
+
+    def get_interconnect(self, env_id):
+        sql_get = "SELECT UrlValue\
+                    FROM [CE_Phonebook_TRN].[dbo].[phonebook]\
+                    WHERE status=1 and OrgID=%s" % env_id
+        cur = self.conn.cursor()
+        cur.execute(sql_get)
+        url_values = cur.fetchone()[0]
+        first_url = url_values.split('\x05')[0]
+        if first_url:
+            return first_url.split("/")[3]
+        return None
+
+    def try_sql(self, sql_string):
+        """
+        tries to execute SQL query and catches any OperationalErrors. Writes the error to the err file.
+        :param sql_string: SQL query to attempt
+        :return:
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute(sql_string)
+            self.conn.commit()
+            return True
+        except pypyodbc.OperationalError as e:
+            msg = "%s\n%s\n\n" % (sql_string, e)
+            Log.error("trn_phonebook.err",
+                      msg)
+            return False
+
+    def __del__(self):
+        self.conn.close()
+
+# # # #
+
+
+if __name__ == "__main__":
+    phonebook = TrnPhonebook()
+    interconnect = phonebook.get_interconnect(72)
+    print interconnect

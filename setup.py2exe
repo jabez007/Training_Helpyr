@@ -1,0 +1,41 @@
+from distutils.core import setup
+import py2exe, sys, os
+
+
+my_data = [('', ['config',])]
+
+folders = ['Log',
+           'MyTrack',
+           'Overlord',
+           'Overlord/OverlordCaller',
+           'Overlord/OverlordCaller/Config'
+		   'PowerShell']
+
+for folder in folders:
+	files = []
+	for f in os.listdir(folder):
+		f_path = os.path.join(folder, f)
+		if os.path.isfile(f_path) and not (f.endswith('.py') or f.endswith('.pyc')):
+			files.append(f_path)
+	if files:
+		my_data.append((folder, files))
+	
+# # # #
+
+sys.argv.append('py2exe')
+	
+setup(windows=[{'script': 'TrainingHelpyr.py',
+                'icon_resources': [(1, 'traininghelpyr_7qG_12.ico')],
+                'dest_base': 'Training Helpyr'}],
+	  data_files = my_data,
+      options={"py2exe": {'compressed': 1,
+                          'optimize': 2,
+                          'bundle_files': 3,
+                          #'excludes': [],
+                          #'includes': [],
+                          'dist_dir': 'Training Helpyr',
+                          'xref': False,
+                          'skip_archive': False,
+                          'ascii': False} 
+               },
+      zipfile = None)
