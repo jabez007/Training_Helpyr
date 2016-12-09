@@ -1,6 +1,3 @@
-# custom - ignore testing files
-*test*
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -90,4 +87,18 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# custom
+*test*
 .idea/
+!BAK/
+!Planning/
+Log/cache.err
+Log/cleanup.err
+Log/my_track.err
+Log/powershell.err
+Log/setup.err
+Log/trn_phonebook.err
+Overlord/OverlordCaller/
+Thumbs.db
+Training Shared - Shortcut.lnk
