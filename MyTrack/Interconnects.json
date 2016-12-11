@@ -1,0 +1,172 @@
+{
+    "AMB_IP": {
+        "train41": {
+            "null": ""
+        }, 
+        "train42": {
+            "null": ""
+        }, 
+        "train43": {
+            "null": ""
+        }, 
+        "train44": {
+            "null": ""
+        }, 
+        "train45": {
+            "null": ""
+        }, 
+        "train46": {
+            "null": ""
+        }, 
+        "train47": {
+            "null": ""
+        }, 
+        "train48": {
+            "null": ""
+        }, 
+        "train49": {
+            "null": ""
+        }, 
+        "train50": {
+            "null": ""
+        }
+    }, 
+    "CE500": {
+        "train02": {
+            "null": ""
+        }, 
+        "train03": {
+            "null": ""
+        }, 
+        "train04": {
+            "null": ""
+        }, 
+        "train05": {
+            "null": ""
+        }, 
+        "train06": {
+            "null": ""
+        }, 
+        "train07": {
+            "null": ""
+        }, 
+        "train08": {
+            "null": ""
+        }, 
+        "train09": {
+            "null": ""
+        }, 
+        "train10": {
+            "null": ""
+        }, 
+        "train11": {
+            "null": ""
+        }, 
+        "train12": {
+            "null": ""
+        }, 
+        "train13": {
+            "null": ""
+        }, 
+        "train14": {
+            "null": ""
+        }, 
+        "train15": {
+            "null": ""
+        }, 
+        "train16": {
+            "null": ""
+        }, 
+        "train17": {
+            "null": ""
+        }, 
+        "train18": {
+            "null": ""
+        }, 
+        "train19": {
+            "null": ""
+        }, 
+        "train20": {
+            "null": ""
+        }, 
+        "train21": {
+            "null": ""
+        }, 
+        "train22": {
+            "null": ""
+        }, 
+        "train23": {
+            "null": ""
+        }, 
+        "train24": {
+            "null": ""
+        }, 
+        "train25": {
+            "null": ""
+        }, 
+        "train26": {
+            "null": ""
+        }, 
+        "train27": {
+            "null": ""
+        }, 
+        "train28": {
+            "null": ""
+        }, 
+        "train29": {
+            "null": ""
+        }, 
+        "train30": {
+            "null": ""
+        }, 
+        "train31": {
+            "null": ""
+        }, 
+        "train32": {
+            "null": ""
+        }, 
+        "train33": {
+            "null": ""
+        }, 
+        "train34": {
+            "null": ""
+        }, 
+        "train35": {
+            "null": ""
+        }, 
+        "train36": {
+            "null": ""
+        }, 
+        "train37": {
+            "null": ""
+        }, 
+        "train38": {
+            "null": ""
+        }, 
+        "train39": {
+            "null": ""
+        }, 
+        "train40": {
+            "null": ""
+        }
+    }, 
+    "Instructors": {
+        "CE500": {
+            "null": [
+                "train01"
+            ]
+        }
+    }, 
+    "Schedule": {
+        "AMB_IP": {
+            "01/01/2016": {
+                "null": []
+            }
+        }, 
+        "CE500": {
+            "01/01/2016": {
+                "null": []
+            }
+        }
+    }
+}
