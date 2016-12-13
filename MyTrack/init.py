@@ -17,18 +17,23 @@ class MyTrack(AutoVivification):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.save(self.database_file)
 
-    def get_class(self, ce_or_funds):
-        ce_or_funds = ce_or_funds.upper()
-        if 'CE500' in ce_or_funds:
-            return self.get_ce()
-        elif 'AMB_IP' in ce_or_funds:
-            return self.get_funds()
+    def _get_class_(self, ce_or_funds):
+        return [(i, self.get_item(ce_or_funds, i)) for i in self[ce_or_funds]]
 
     def get_ce(self):
-        return [(i, self.get_item("CE500", i)) for i in self["CE500"] if i is not None]
+        return self._get_class_("CE500")
+
+    def get_assigned_ce(self):
+        return [(i, c) for i, c in self.get_ce() if c != ""]
+
+    def get_next_unassigned_ce(self):
+        return [(i, c) for i, c in self.get_ce() if c == ""][0][0]
+
+    def get_instructor_ce(self):
+        return [(i, self.get_item("Instructors", "CE500", i)) for i in self["Instructors"]["CE500"]][0]
 
     def get_funds(self):
-        return self.get_item("AMB_IP")
+        return self._get_class_("AMB_IP")
 
 # # # #
 
@@ -36,3 +41,7 @@ class MyTrack(AutoVivification):
 if __name__ == "__main__":
     track = MyTrack()
     print track.get_ce()
+    print track.get_assigned_ce()
+    print track.get_next_unassigned_ce()
+    print track.get_instructor_ce()
+    print track.get_funds()
