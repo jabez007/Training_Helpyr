@@ -8,7 +8,7 @@ folders = ['Log',
            'MyTrack',
            'Overlord',
            'Overlord/OverlordCaller',
-           'Overlord/OverlordCaller/Config'
+           'Overlord/OverlordCaller/Config',
 		   'PowerShell']
 
 for folder in folders:
