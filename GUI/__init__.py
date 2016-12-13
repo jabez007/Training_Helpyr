@@ -1,5 +1,6 @@
 from Tkinter import *
 
+import MyTrack
 import TabbedUI
 from SetupTab import SetupTab
 from CleanupTab import CleanupTab
@@ -12,6 +13,8 @@ class Tabbed(Frame):
         Frame.__init__(self,
                        parent)
         self.parent = parent
+
+        MyTrack.init()
 
         self.classes = {1: "CE500",
                         2: "AMB_IP"}

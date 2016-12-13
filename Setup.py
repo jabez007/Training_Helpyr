@@ -151,16 +151,9 @@ def assign_interconnects(_class, caches):
 
 
 def setup_cache(trns, code, flag=""):
-    for trn in trns:
-        env = int(trn)
-        if env < 10:
-            env_id = "TRAIN0" + trn
-        else:
-            env_id = "TRAIN" + trn
-
-        if not Overlord.overlord(env_id, code, flag):
-            log_error("Error running %s on %s. See cache.err" % (code, env_id))
-            return False
+    if not Overlord.overlord(",".join(trns), code, flag):
+        log_error("Error running %s. See cache.err" % code)
+        return False
 
     return True
 
