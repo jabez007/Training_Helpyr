@@ -13,10 +13,20 @@ Special setup for Care Everywhere 101 (fka CE-500)
 
 
 def ce500(instructor, trainees, code="CSCce500setup"):
+    """
+    entry point for setting up CE 101 (FKA CE500)
+    :param instructor: <string> the cache environment for the Instructor
+    :param trainees: <list(string)> the cache environments for the trainees
+    :param code: <string> the Overlord tag the needs to be ran in each environment to complete setup
+    :return: <bool> True if everything was successful
+    """
     gwn = None
     trainees = clean_caches(trainees)
 
     if instructor:
+        '''
+        if this is a fresh class setup, as in we are not just adding trainee environments to an existing class
+        '''
         # pull out the last trainee environment and make it GWN
         gwn = trainees[-1:]
         gwen(gwn)
@@ -50,6 +60,11 @@ def ce500(instructor, trainees, code="CSCce500setup"):
 
 
 def setup_instructor(instructor):
+    """
+    runs the setup particular to the instructor environment
+    :param instructor: <string> the cache environment for the class instructor
+    :return: <bool> True is everything was successful
+    """
     # Connect Interconnect to instructor environment
     if not PowerShell.setup('01', instructor):
         log_error("Failed to connect epic-trn%s to CE500 instructor Interconnect. See powershell.err" % instructor)
@@ -57,17 +72,24 @@ def setup_instructor(instructor):
 
     # Save to tracking database
     if not MyTrack.assign("Instructors", "train01", "epic-trn"+instructor):
-        log_error("Setup between CE500 instructor Interconnect and epic-trn%s not saved to database. See my_track.err" % instructor)
+        log_error("Setup between CE500 instructor Interconnect and epic-trn%s not saved to database. See my_track.err"
+                  % instructor)
 
     # Reset TRN Phonebook and register Instructor environment
     if not Phonebook.TrnPhonebook().instructor(instructor):
-        log_error("Error in registering epic-trn%s as the Instructor environment in the Training Phonebook. See TRNphonebook.err" % instructor)
+        log_error("Error in registering epic-trn%s as the Instructor environment in the Training Phonebook. See TRNphonebook.err"
+                  % instructor)
         return False
 
     return True
 
 
 def update_phonebook(trainees):
+    """
+    updates the training Phonebook with trainee environments for this class
+    :param trainees: <list(string)> the cache environments for the trainees
+    :return: <bool> True if everything was successful
+    """
     for cache in trainees:
         if not Phonebook.TrnPhonebook().register(cache):
             log_error("Error in registering epic-trn%s with Training Phonebook. See TRNphonebook.err" % cache)
@@ -76,6 +98,11 @@ def update_phonebook(trainees):
 
 
 def gwen(trainee):
+    """
+    runs the setup particular to the Galaxy Wide Network environment
+    :param trainee: <string> the cache environment for GWN
+    :return: <bool> True if everything was successful
+    """
     # assign interconnect - this should be the same as the other trainee environments
     assign_interconnects("CE500", trainee)
     # update Phonebook

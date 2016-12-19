@@ -1,6 +1,6 @@
 import pypyodbc
 
-import Log
+from MyLog import MyLog
 
 
 class TrnPhonebook:
@@ -9,8 +9,15 @@ class TrnPhonebook:
 
     def __init__(self):
         self.conn = pypyodbc.connect('Driver={SQL Server};Server=cephonebooktrn-sql;database=CE_Phonebook_TRN')
+        self.my_log = MyLog(name=__name__, level='debug')
 
     def reset(self):
+        """
+        returns the Training Phonebook to a clean state
+        :return: <bool> True if all the updates were successful
+        """
+        self.my_log.info("Resetting the Phonebook")
+
         update_phonebook = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]"
         where_orgid = "WHERE OrgID > 99"
 
@@ -56,26 +63,50 @@ class TrnPhonebook:
         return self.try_sql(sql_default) and self.try_sql(sql_reset_address) and self.try_sql(sql_reset_name)
 
     def instructor(self, cache):
+        """
+        registers the instructor environment with the Phonebook
+        :param cache: <string> the cache training environment for the instructor
+        :return: <bool> True if all the updates were successful
+        """
+        self.my_log.info("Registering %s as Instructor with the Phonebook" % cache)
         sql_instructor = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook] SET OrgName = 'Instructor Health System'\
                            WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
         return self.try_sql(sql_instructor) and self.register(cache)
 
     def register(self, cache):
+        """
+        updates the Go Live date for the specified cache environment so that it is usable in class
+        :param cache: <string> the number of the training environment to be used in class
+        :return: <bool> True if the update was successful
+        """
+        self.my_log.info("Registering %s with the Phonebook" % cache)
         sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
                         SET GoLive = '5499187200'\
                         WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
+        self.my_log.debug("Updating GoLive for %d" % int(cache)*100)
         return self.try_sql(sql_register)
 
     def register_gwn(self, cache):
+        """
+        particular registration required for the Galaxy Wide Network environment
+        :param cache: <string> the number for the cache training environment
+        :return: <bool> True if the update was successful
+        """
+        self.my_log.info("Registering %s as GWN with the Phonebook" % cache)
         old_interconnect = self.get_interconnect(72)
-
         sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
                          SET GoLive='5499187200', UrlValue=REPLACE(UrlValue,'%s','Interconnect-train%s')\
                          WHERE status = 1 AND OrgID = 72" % (old_interconnect, cache)
-
+        self.my_log.debug("Updating %s to Interconnect-train%s" % (old_interconnect, cache))
         return self.try_sql(sql_register)
 
     def get_interconnect(self, env_id):
+        """
+        retrieves the IIS directory in use for the specified organization ID
+        :param env_id: <string> the DXO ID of the environment you are searching for
+        :return: <string> the IIS directory for said organization/environment
+        """
+        self.my_log.info("Finding IIS directory for %s" % env_id)
         sql_get = "SELECT UrlValue\
                     FROM [CE_Phonebook_TRN].[dbo].[phonebook]\
                     WHERE status=1 and OrgID=%s" % env_id
@@ -84,13 +115,14 @@ class TrnPhonebook:
         url_values = cur.fetchone()[0]
         first_url = url_values.split('\x05')[0]
         if first_url:
+            self.my_log.debug("Found %s for %s" % (first_url.split("/")[3], env_id))
             return first_url.split("/")[3]
-        return None
+        return ""
 
     def try_sql(self, sql_string):
         """
         tries to execute SQL query and catches any OperationalErrors. Writes the error to the err file.
-        :param sql_string: SQL query to attempt
+        :param sql_string: <string> SQL query to attempt
         :return:
         """
         try:
@@ -100,8 +132,7 @@ class TrnPhonebook:
             return True
         except pypyodbc.OperationalError as e:
             msg = "%s\n%s\n\n" % (sql_string, e)
-            Log.error("trn_phonebook.err",
-                      msg)
+            self.my_log.exception(msg)
             return False
 
     def __del__(self):
