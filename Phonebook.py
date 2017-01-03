@@ -1,5 +1,7 @@
 import pypyodbc
 
+import sys
+sys.path.append(r"F:\personal\jwmccann\Python\Personal\MyLib.py")
 from MyLog import MyLog
 
 
@@ -8,6 +10,23 @@ class TrnPhonebook:
     # CE_Phonebook_TRN
 
     def __init__(self):
+        self.phonebook_dbo = "[CE_Phonebook_TRN].[dbo].[phonebook]"
+        self.update_phonebook = "UPDATE {0}".format(self.phonebook_dbo)
+        self.class_orgs = "OrgID > 99 AND OrgID < 900000"
+        self.class_orgs_under_10000 = "OrgID > 99 and OrgID < 10000"
+        self.class_orgs_over_9999 = "OrgID > 9999 and OrgID < 900000"
+        self.where_class_org = "WHERE {0}".format(self.class_orgs)
+        self.prep_orgs = "OrgID > 899999"
+        self.where_prep_org = "WHERE {0}".format(self.prep_orgs)
+        self.active = "status = 1"
+        self.where_active_and_class_org = "WHERE {0} AND {1}".format(self.active, self.class_orgs)
+        self.where_active_and_class_org_under_10000 = "WHERE {0} AND {1}".format(self.active,
+                                                                                 self.class_orgs_under_10000)
+        self.where_active_and_class_org_over_9999 = "WHERE {0} and {1}".format(self.active,
+                                                                               self.class_orgs_over_9999)
+        self.go_live_on = "5554137600"  # 1/1/2017 12:00:00 AM
+        self.go_live_off = "10500278400"  # 9/27/2173 12:00:00 AM
+
         self.conn = pypyodbc.connect('Driver={SQL Server};Server=cephonebooktrn-sql;database=CE_Phonebook_TRN')
         self.my_log = MyLog(name=__name__, level='debug')
 
@@ -17,9 +36,6 @@ class TrnPhonebook:
         :return: <bool> True if all the updates were successful
         """
         self.my_log.info("Resetting the Phonebook")
-
-        update_phonebook = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]"
-        where_orgid = "WHERE OrgID > 99"
 
         sql_default = "{0} SET status = 4 WHERE OrgType IN (4, 10)\
                        {0} SET QueryPhone = NULL {1}\
@@ -37,28 +53,32 @@ class TrnPhonebook:
                        {0} SET PPOCDefaultDays = NULL {1}\
                        {0} SET PPOCOrgDays = NULL {1}\
                        {0} SET PPOCOrgs = NULL {1}\
-                       {0} SET GoLive = '8173353600' {1}".format(update_phonebook, where_orgid)
+                       {0} SET GoLive = '{3}' {1}\
+                       {0} SET GoLive = '{4}' {2}".format(self.update_phonebook,
+                                                          self.where_class_org,
+                                                          self.where_prep_org,
+                                                          self.go_live_off,
+                                                          self.go_live_on)
 
-        where_active_and_orgid = "WHERE status = 1 AND OrgID > 99"
-
-        sql_reset_address = "{0} SET Address = concat(substring(URL,12,2),' Main Street') {1} AND OrgID<10000\
-                             {0} SET Address = concat(substring(URL,12,3),' Main Street') where status=1 and OrgID>9999\
+        sql_reset_address = "{0} SET Address = concat(substring(URL,12,2),' Main Street') {2}\
+                             {0} SET Address = concat(substring(URL,12,3),' Main Street') {3}\
                              {0} SET CareEverywhereCountry = 1 {1}\
                              {0} SET City = 'Verona' {1}\
                              {0} SET State = '50 Wisconsin WI' {1}\
                              {0} SET StateName = 'Wisconsin' {1}\
                              {0} SET Zip = '53593' {1}\
                              {0} SET Country = 'United States of America' {1}\
-                             \
                              {0} SET DisplayAddress = CONCAT(Address,CHAR(0x5),City,' WI ',Zip,CHAR(0x5),Country) {1}\
-                            ".format(update_phonebook, where_active_and_orgid)
+                            ".format(self.update_phonebook,
+                                     self.where_class_org,
+                                     self.where_active_and_class_org_under_10000,
+                                     self.where_active_and_class_org_over_9999)
         
-        sql_reset_name = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
-                           SET OrgName = concat(substring(URL, 9, 5), ' Health System')\
-                           WHERE status = 1 AND OrgID < 10000 AND OrgID > 99\
-                          UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
-                           SET OrgName = concat(substring(URL, 9, 6), ' Health System')\
-                           WHERE status = 1 AND OrgID > 9999"
+        sql_reset_name = "{0} SET OrgName = concat(substring(URL, 9, 5), ' Health System') {1}\
+                          {0} SET OrgName = concat(substring(URL, 9, 6), ' Health System') {2}\
+                          ".format(self.update_phonebook,
+                                   self.where_active_and_class_org_under_10000,
+                                   self.where_active_and_class_org_over_9999)
         
         return self.try_sql(sql_default) and self.try_sql(sql_reset_address) and self.try_sql(sql_reset_name)
 
@@ -69,9 +89,14 @@ class TrnPhonebook:
         :return: <bool> True if all the updates were successful
         """
         self.my_log.info("Registering %s as Instructor with the Phonebook" % cache)
-        sql_instructor = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook] SET OrgName = 'Instructor Health System'\
+
+        sql_instructor = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
+                           SET OrgName = 'Instructor Health System'\
                            WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
-        return self.try_sql(sql_instructor) and self.register(cache)
+
+        sql_prep = "{0} SET GoLive = '{2}' {1}".format(self.update_phonebook, self.where_prep_org, self.go_live_off)
+
+        return self.try_sql(sql_instructor) and self.try_sql(sql_prep) and self.register(cache)
 
     def register(self, cache):
         """
@@ -80,10 +105,13 @@ class TrnPhonebook:
         :return: <bool> True if the update was successful
         """
         self.my_log.info("Registering %s with the Phonebook" % cache)
+
         sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
-                        SET GoLive = '5499187200'\
-                        WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
+                         SET GoLive = '5499187200'\
+                         WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
+
         self.my_log.debug("Updating GoLive for %d" % int(cache)*100)
+
         return self.try_sql(sql_register)
 
     def register_gwn(self, cache):
@@ -93,11 +121,14 @@ class TrnPhonebook:
         :return: <bool> True if the update was successful
         """
         self.my_log.info("Registering %s as GWN with the Phonebook" % cache)
+
         old_interconnect = self.get_interconnect(72)
         sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
                          SET GoLive='5499187200', UrlValue=REPLACE(UrlValue,'%s','Interconnect-train%s')\
                          WHERE status = 1 AND OrgID = 72" % (old_interconnect, cache)
+
         self.my_log.debug("Updating %s to Interconnect-train%s" % (old_interconnect, cache))
+
         return self.try_sql(sql_register)
 
     def get_interconnect(self, env_id):
