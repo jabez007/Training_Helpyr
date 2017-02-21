@@ -29,10 +29,12 @@ def ce500(instructor, trainees, code="CSCce500setup"):
         '''
         # pull out the last trainee environment and make it GWN
         gwn = trainees[-1:]
-        gwen(gwn)
-
-        # then take that environment out of the list we'll set up later
-        trainees = trainees[:-1]
+        if gwen(gwn):
+            # then take that environment out of the list we'll set up later
+            trainees = trainees[:-1]
+        else:
+            # otherwise, skip the GWN setup and make this a normal environment
+            gwn = None
 
         setup_instructor(instructor)
 
@@ -106,7 +108,8 @@ def gwen(trainee):
     # assign interconnect - this should be the same as the other trainee environments
     assign_interconnects("CE500", trainee)
     # update Phonebook
-    Phonebook.TrnPhonebook().register_gwn(trainee[0])
+    if not Phonebook.TrnPhonebook().register_gwn(trainee[0]):
+        return False
     # setup cache for GWN with the other environments
     return True
 

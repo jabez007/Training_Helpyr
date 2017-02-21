@@ -123,6 +123,8 @@ class TrnPhonebook:
         self.my_log.info("Registering %s as GWN with the Phonebook" % cache)
 
         old_interconnect = self.get_interconnect(72)
+        if not old_interconnect:
+            return False
         sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
                          SET GoLive='5499187200', UrlValue=REPLACE(UrlValue,'%s','Interconnect-train%s')\
                          WHERE status = 1 AND OrgID = 72" % (old_interconnect, cache)
@@ -143,9 +145,16 @@ class TrnPhonebook:
                     WHERE status=1 and OrgID=%s" % env_id
         cur = self.conn.cursor()
         cur.execute(sql_get)
-        url_values = cur.fetchone()[0]
-        first_url = url_values.split('\x05')[0]
-        if first_url:
+        fetched_row = cur.fetchone()
+        if fetched_row is not None:
+            url_values = fetched_row[0]
+        else:
+            url_values = None
+        if url_values is not None:
+            first_url = url_values.split('\x05')[0]
+        else:
+            first_url = None
+        if first_url is not None:
             self.my_log.debug("Found %s for %s" % (first_url.split("/")[3], env_id))
             return first_url.split("/")[3]
         return ""
