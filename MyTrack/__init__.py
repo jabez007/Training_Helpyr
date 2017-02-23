@@ -6,7 +6,7 @@ import os
 import PowerShell
 import Log
 
-TRACK_PATH = os.path.join(os.getcwd(), "MyTrack")
+TRACK_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def init(config_f="config"):
@@ -312,4 +312,4 @@ def reconcile():
 
 
 if __name__ == "__main__":
-    init()
+    print TRACK_PATH

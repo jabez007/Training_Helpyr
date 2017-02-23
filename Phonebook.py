@@ -1,4 +1,6 @@
 import pypyodbc
+import Log
+
 
 import sys
 sys.path.append(r"F:\personal\jwmccann\Python\Personal\MyLib.py")
@@ -28,14 +30,14 @@ class TrnPhonebook:
         self.go_live_off = "10500278400"  # 9/27/2173 12:00:00 AM
 
         self.conn = pypyodbc.connect('Driver={SQL Server};Server=cephonebooktrn-sql;database=CE_Phonebook_TRN')
-        self.my_log = MyLog(name=__name__, level='debug')
+        # self.my_log = MyLog(name=__name__, level='debug')
 
     def reset(self):
         """
         returns the Training Phonebook to a clean state
         :return: <bool> True if all the updates were successful
         """
-        self.my_log.info("Resetting the Phonebook")
+        Log.info(__name__, "Resetting the Phonebook")
 
         sql_default = "{0} SET status = 4 WHERE OrgType IN (4, 10)\
                        {0} SET QueryPhone = NULL {1}\
@@ -88,7 +90,7 @@ class TrnPhonebook:
         :param cache: <string> the cache training environment for the instructor
         :return: <bool> True if all the updates were successful
         """
-        self.my_log.info("Registering %s as Instructor with the Phonebook" % cache)
+        Log.info(__name__, "Registering %s as Instructor with the Phonebook" % cache)
 
         sql_instructor = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
                            SET OrgName = 'Instructor Health System'\
@@ -104,13 +106,13 @@ class TrnPhonebook:
         :param cache: <string> the number of the training environment to be used in class
         :return: <bool> True if the update was successful
         """
-        self.my_log.info("Registering %s with the Phonebook" % cache)
+        Log.info(__name__, "Registering %s with the Phonebook" % cache)
 
         sql_register = "UPDATE [CE_Phonebook_TRN].[dbo].[phonebook]\
                          SET GoLive = '5499187200'\
                          WHERE status = 1 AND OrgID = %d" % (int(cache)*100)
 
-        self.my_log.debug("Updating GoLive for %d" % int(cache)*100)
+        Log.debug(__name__, "Updating GoLive for %d" % int(cache)*100)
 
         return self.try_sql(sql_register)
 
@@ -120,7 +122,7 @@ class TrnPhonebook:
         :param cache: <string> the number for the cache training environment
         :return: <bool> True if the update was successful
         """
-        self.my_log.info("Registering %s as GWN with the Phonebook" % cache)
+        Log.info(__name__, "Registering %s as GWN with the Phonebook" % cache)
 
         old_interconnect = self.get_interconnect(72)
         if not old_interconnect:
@@ -129,7 +131,7 @@ class TrnPhonebook:
                          SET GoLive='5499187200', UrlValue=REPLACE(UrlValue,'%s','Interconnect-train%s')\
                          WHERE status = 1 AND OrgID = 72" % (old_interconnect, cache)
 
-        self.my_log.debug("Updating %s to Interconnect-train%s" % (old_interconnect, cache))
+        Log.debug(__name__, "Updating %s to Interconnect-train%s" % (old_interconnect, cache))
 
         return self.try_sql(sql_register)
 
@@ -139,7 +141,7 @@ class TrnPhonebook:
         :param env_id: <string> the DXO ID of the environment you are searching for
         :return: <string> the IIS directory for said organization/environment
         """
-        self.my_log.info("Finding IIS directory for %s" % env_id)
+        Log.info(__name__, "Finding IIS directory for %s" % env_id)
         sql_get = "SELECT UrlValue\
                     FROM [CE_Phonebook_TRN].[dbo].[phonebook]\
                     WHERE status=1 and OrgID=%s" % env_id
@@ -155,7 +157,7 @@ class TrnPhonebook:
         else:
             first_url = None
         if first_url is not None:
-            self.my_log.debug("Found %s for %s" % (first_url.split("/")[3], env_id))
+            Log.debug(__name__, "Found %s for %s" % (first_url.split("/")[3], env_id))
             return first_url.split("/")[3]
         return ""
 
@@ -172,7 +174,7 @@ class TrnPhonebook:
             return True
         except pypyodbc.OperationalError as e:
             msg = "%s\n%s\n\n" % (sql_string, e)
-            self.my_log.exception(msg)
+            Log.error(__name__, msg)
             return False
 
     def __del__(self):

@@ -3,8 +3,7 @@ import os
 
 import Log
 
-OVERLORD_PATH = os.path.join(os.getcwd(),
-                             "Overlord",
+OVERLORD_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "OverlordCaller")
 
 
@@ -38,9 +37,8 @@ def log_error():
 
     for detail in details_list:
         msg = "%s: %s" % tuple(detail.split("|"))
-        Log.error("cache.err",
+        Log.error(__name__,
                   msg)
-
 
 # # # #
 

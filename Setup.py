@@ -189,22 +189,13 @@ def setup_cache(trns, code, flag=""):
 
 
 def log_error(msg):
-    Log.error("setup.err",
+    Log.error(__name__,
               msg)
 
 # # # #
 
 
 if __name__ == "__main__":
-    import os
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
-    import types
-    my_modules = [val for alias, val in globals().items()
-                  if isinstance(val, types.ModuleType) and val.__name__ in MY_MODULES]
-    for module in my_modules:
-        module = reload(module)
-
     import datetime
     today = (datetime.datetime.now()).strftime("%m/%d/%Y")  # MM/DD/YYYY
     print("Setting up classes for %s:" % today)

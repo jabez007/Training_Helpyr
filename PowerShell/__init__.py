@@ -3,7 +3,7 @@ import os
 
 import Log
 
-PS_PATH = os.path.join(os.getcwd(), "PowerShell")
+PS_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def setup(interconnect, cache):
@@ -97,7 +97,7 @@ def restart_phonebook():
 
 
 def log_error(msg):
-    Log.error("powershell.err",
+    Log.error(__name__,
               msg)
 
 # # # #
