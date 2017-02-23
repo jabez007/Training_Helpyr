@@ -41,9 +41,9 @@ def debug(debug_name, debug_msg):
         LOGS["DEBUG"] = dict()
 
     if debug_name not in LOGS["DEBUG"]:
-        LOGS["DEBUG"][debug_name] = MyLog(name=debug_name)
+        LOGS["DEBUG"][debug_name] = MyLog(name=debug_name, level="DEBUG")
 
-    LOGS["DEBUG"][debug_name].info(debug_msg)
+    LOGS["DEBUG"][debug_name].debug(debug_msg)
 
 # # # #
 
