@@ -5,6 +5,7 @@ import Log
 
 OVERLORD_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              "OverlordCaller")
+LOGGER = Log.MyLog(name=__name__)
 
 
 def overlord(env="", tag="", params=""):
@@ -37,8 +38,7 @@ def log_error():
 
     for detail in details_list:
         msg = "%s: %s" % tuple(detail.split("|"))
-        Log.error(__name__,
-                  msg)
+        LOGGER.error(msg)
 
 # # # #
 

@@ -4,7 +4,7 @@ import Phonebook
 import Overlord
 import Log
 
-MY_MODULES = ["Log", "Overlord", "MyTrack", "Phonebook", "PowerShell"]
+LOGGER = Log.MyLog(name=__name__)
 
 # # # #
 """
@@ -32,9 +32,11 @@ def ce500(instructor, trainees, code="CSCce500setup"):
         if gwen(gwn):
             # then take that environment out of the list we'll set up later
             trainees = trainees[:-1]
+            LOGGER.info("epic-trn%s set up as GWN environment" % gwn[0])
         else:
             # otherwise, skip the GWN setup and make this a normal environment
             gwn = None
+            LOGGER.error("Galaxy Wide Network not set up")
 
         setup_instructor(instructor)
 
@@ -49,7 +51,7 @@ def ce500(instructor, trainees, code="CSCce500setup"):
 
     # Restart the Training Phone Book so our changes take affect
     if not PowerShell.restart_phonebook():
-        log_error("Error in restarting Training Phonebook Interconnect")
+        LOGGER.error("Error in restarting Training Phonebook Interconnect")
         return False
 
     # Run Cache setup script
@@ -69,20 +71,21 @@ def setup_instructor(instructor):
     """
     # Connect Interconnect to instructor environment
     if not PowerShell.setup('01', instructor):
-        log_error("Failed to connect epic-trn%s to CE500 instructor Interconnect. See powershell.err" % instructor)
+        LOGGER.error("Failed to connect epic-trn%s to CE500 instructor Interconnect. See powershell.err" % instructor)
         return False
 
     # Save to tracking database
     if not MyTrack.assign("Instructors", "train01", "epic-trn"+instructor):
-        log_error("Setup between CE500 instructor Interconnect and epic-trn%s not saved to database. See my_track.err"
-                  % instructor)
+        LOGGER.error("Setup between CE500 instructor Interconnect and epic-trn%s not saved to database. See my_track.err"
+                     % instructor)
 
     # Reset TRN Phonebook and register Instructor environment
     if not Phonebook.TrnPhonebook().instructor(instructor):
-        log_error("Error in registering epic-trn%s as the Instructor environment in the Training Phonebook. See TRNphonebook.err"
-                  % instructor)
+        LOGGER.error("Error in registering epic-trn%s as the Instructor environment in the Training Phonebook. See TRNphonebook.err"
+                     % instructor)
         return False
 
+    LOGGER.info("epic-trn%s set up as instructor environment" % instructor)
     return True
 
 
@@ -94,8 +97,9 @@ def update_phonebook(trainees):
     """
     for cache in trainees:
         if not Phonebook.TrnPhonebook().register(cache):
-            log_error("Error in registering epic-trn%s with Training Phonebook. See TRNphonebook.err" % cache)
+            LOGGER.error("Error in registering epic-trn%s with Training Phonebook. See TRNphonebook.err" % cache)
             return False
+    LOGGER.info("Trainee environments registered in phonebook")
     return True
 
 
@@ -163,34 +167,31 @@ def assign_interconnects(_class, caches):
 
         if interconnect:
             if not PowerShell.setup(interconnect, cache):
-                log_error("Failed to connect epic-trn%s to train%s. See powershell.err" % (cache, interconnect))
+                LOGGER.error("Powershell failed to connect epic-trn%s to train%s" % (cache, interconnect))
                 return None
 
             assigned_interconnects += 1
             pairs.append((cache, interconnect))
 
             if not MyTrack.assign(clss, "train"+interconnect, "epic-trn"+cache):
-                log_error("Setup between epic-trn%s and train%s not saved to database. See my_track.err" % (cache, interconnect))
+                LOGGER.error("Setup between epic-trn%s and train%s not saved to MyTrack" % (cache, interconnect))
                 return None
 
         else:
-            log_error("No Interconnect returned for epic-trn%s. see my_track.err" % cache)
+            LOGGER.error("No Interconnect returned from MyTrack for epic-trn%s" % cache)
             return None
+
+        LOGGER.debug("epic-trn%s connected to Interconnect-train%s" % (cache, interconnect))
 
     return pairs
 
 
 def setup_cache(trns, code, flag=""):
     if not Overlord.overlord(",".join(trns), code, flag):
-        log_error("Error running %s. See cache.err" % code)
+        LOGGER.error("Error running %s. See cache.err" % code)
         return False
-
+    LOGGER.info("%s successfully ran in %s" % (code, ", ".join(trns)))
     return True
-
-
-def log_error(msg):
-    Log.error(__name__,
-              msg)
 
 # # # #
 

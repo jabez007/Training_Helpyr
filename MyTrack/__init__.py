@@ -7,6 +7,7 @@ import PowerShell
 import Log
 
 TRACK_PATH = os.path.dirname(os.path.realpath(__file__))
+LOGGER = Log.MyLog(name=__name__)
 
 
 def init(config_f="config"):
@@ -189,8 +190,7 @@ def try_sql(conn, sql_string):
     except (sqlite3.OperationalError, sqlite3.IntegrityError) as e:
         msg = "%s\n%s\n\n" % (sql_string, e)
 
-        Log.error("my_track.err",
-                  msg)
+        LOGGER.exception(msg)
 
         return False
 

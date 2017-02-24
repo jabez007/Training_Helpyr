@@ -1,51 +1,35 @@
-import time
+import logging
 import os
 
-import sys
-sys.path.append(r"F:\personal\jwmccann\Python\Personal\MyLib.py")
-from MyLog import MyLog
+LOG_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-ERR_PATH = os.path.dirname(os.path.realpath(__file__))
-LOGS = dict()
+class MyLog(logging.Logger):
 
+    def __init__(self, name=__name__, level="INFO", file_ext="log"):
+        """
 
-def error(err_name, err_msg):
-    global LOGS
+        :param name:
+        :param level: DEBUG, INFO, WARN, ERROR, CRITICAL - the logger will write everything at that level and down
+        :param file_ext:
+        """
+        level = level.upper()
+        log_level = getattr(logging, level, "INFO")
+        logging.Logger.__init__(self, name, log_level)
 
-    if "ERRORS" not in LOGS:
-        LOGS["ERRORS"] = dict()
+        # create a file handler
+        log_path = os.path.join(LOG_DIR, name)
+        if not os.path.isdir(log_path):
+            os.mkdir(log_path)
+        log_filename = ".".join([level, file_ext])
+        handler = logging.FileHandler(os.path.join(log_path, log_filename))
+        handler.setLevel(log_level)
 
-    if err_name not in LOGS["ERRORS"]:
-        LOGS["ERRORS"][err_name] = MyLog(name=err_name, level="ERROR")
+        # create a logging format
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
 
-    LOGS["ERRORS"][err_name].error(err_msg)
-
-
-def info(info_name, info_msg):
-    global LOGS
-
-    if "INFO" not in LOGS:
-        LOGS["INFO"] = dict()
-
-    if info_name not in LOGS["INFO"]:
-        LOGS["INFO"][info_name] = MyLog(name=info_name)
-
-    LOGS["INFO"][info_name].info(info_msg)
-
-
-def debug(debug_name, debug_msg):
-    global LOGS
-
-    if "DEBUG" not in LOGS:
-        LOGS["DEBUG"] = dict()
-
-    if debug_name not in LOGS["DEBUG"]:
-        LOGS["DEBUG"][debug_name] = MyLog(name=debug_name, level="DEBUG")
-
-    LOGS["DEBUG"][debug_name].debug(debug_msg)
+        # add the handlers to the logger
+        self.addHandler(handler)
 
 # # # #
-
-if __name__ == "__main__":
-    print ERR_PATH

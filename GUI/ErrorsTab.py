@@ -16,12 +16,12 @@ class ErrorsTab(MyTab):
         self.init_ui()
 
     def init_ui(self):
-       # Errors Tabs Frame
+        # Errors Tabs Frame
         errors_tabs_frame = TabbedUI.TabBar(self,
                                             "setup.err")
 
         # # Error Files Frames
-        for f in os.listdir(Log.ERR_PATH):
+        for f in os.listdir(Log.LOG_DIR):
             if f.endswith(".err"):
                 self.errors[f] = TabbedUI.Tab(self,
                                               f)
@@ -48,7 +48,7 @@ class ErrorsTab(MyTab):
     def get_errors(self):
         for f in self.errors:
             if type(f) is str:
-                with open(os.path.join(Log.ERR_PATH, f), 'r') as err:
+                with open(os.path.join(Log.LOG_DIR, f), 'r') as err:
                     errors = [line.strip() for line in err.readlines()]
                 errors_text = "\n".join(reversed(errors))
                 self.errors[f, "Text"].insert(END,

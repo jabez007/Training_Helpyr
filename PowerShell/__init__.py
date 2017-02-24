@@ -4,6 +4,7 @@ import os
 import Log
 
 PS_PATH = os.path.dirname(os.path.realpath(__file__))
+LOGGER = Log.MyLog(name=__name__)
 
 
 def setup(interconnect, cache):
@@ -31,7 +32,8 @@ def cleanup(interconnect, cache):
                          cwd=PS_PATH)
     result = p.wait()
     if int(result) != 0:
-        log_error("Failed to stop Interconnect-train%s service and remove Interconnect-train%s IIS directory" % (interconnect, cache))
+        log_error("Failed to stop Interconnect-train%s service and remove Interconnect-train%s IIS directory"
+                  % (interconnect, cache))
         return False
     return True
 
@@ -97,8 +99,7 @@ def restart_phonebook():
 
 
 def log_error(msg):
-    Log.error(__name__,
-              msg)
+    LOGGER.error(msg)
 
 # # # #
 
