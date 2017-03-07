@@ -68,19 +68,22 @@ def create_schedule(conn):
         sql_create = 'CREATE TABLE Schedule(Cache VARCHAR(12),\
                                             Start VARCHAR(%d),\
                                             End VARCHAR(%d),\
-                                            PRIMARY KEY (Cache, Start))' % (len("00/00/000"), len("00/00/000"))
+                                            PRIMARY KEY (Cache, Start))' % (len("00/00/0000"), len("00/00/0000"))
         if try_sql(conn, sql_create):
             return True
         else:
             return False
     else:
+        sql_add_column = 'ALTER TABLE Schedule\
+                                ADD COLUMN Trainer VARCHAR(255)'
+        try_sql(conn, sql_add_column)
         return True
 
 
-def save_schedule(cache, start, end):
+def save_schedule(cache, start, end, trainer="Jimmy McCann"):
     database = open_database()
-    sql_put = "INSERT INTO Schedule (Cache, Start, End) \
-                VALUES ('%s','%s','%s')" % (cache, start, end)
+    sql_put = "INSERT INTO Schedule (Cache, Start, End, Trainer) \
+                VALUES ('%s','%s','%s','%s')" % (cache, start, end, trainer)
     try_sql(database, sql_put)
     database.close()
     return
@@ -88,7 +91,7 @@ def save_schedule(cache, start, end):
 
 def setup_schedule(start):
     database = open_database()
-    sql_get = "SELECT Cache\
+    sql_get = "SELECT Cache, Trainer\
                 FROM Schedule\
                 WHERE Start='%s'" % start
     results = database.execute(sql_get).fetchall()

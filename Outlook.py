@@ -49,26 +49,33 @@ def get_folder_by_path(obj, folder_path):
 
 
 def read_hdr(request_body):
-    cache = re.search('to be set up:(.+?)\n', request_body)
-    start = re.search('Start date of class:(.+?)\n', request_body)
-    end = re.search('End date of class:(.+?)\n', request_body)
+    # print request_body
+    trainer = re.search('Created by:\s*([a-zA-Z]+ [a-zA-Z]+)\s', request_body)
+    cache = re.search('to be set up:(.+?)\n+', request_body)
+    start = re.search('Start date of class:(.+?)\n+', request_body)
+    end = re.search('End date of class:(.+?)\s', request_body)
     if cache and start and end:
-        return ''.join(c for c in cache.group(1) if c.isdigit()), start.group(1).strip(), end.group(1).strip()
+        return ''.join(c for c in cache.group(1) if c.isdigit()), \
+               start.group(1).strip(), \
+               end.group(1).strip(), \
+               trainer.group(1).strip()
 
-    return None, None, None
+    return None, None, None, None
 
 
 def schedule_class():
     hdr_requests = find_requests()
     print "New Helpdesk Requests found:"
     for hdr in hdr_requests:
+        # print hdr
         if all(elm for elm in hdr):
             cache = hdr[0]
             start = format_time(hdr[1])
             end = format_time(hdr[2])
+            trainer = hdr[3]
             if int(cache) <= 300 and all(date is not None for date in [start, end]):
-                print "\t", cache, start, end
-                MyTrack.save_schedule(cache, start, end)
+                print "\t", cache, start, end, trainer
+                MyTrack.save_schedule(cache, start, end, trainer)
 
 
 def format_time(time_string):
@@ -127,12 +134,21 @@ def format_time(time_string):
     except ValueError:
         pass
 
+
+def send_email(e_address, env):
+    outlook = win32com.client.gencache.EnsureDispatch("Outlook.Application")
+
+    # https://msdn.microsoft.com/en-us/library/office/ff869291.aspx
+    msg = outlook.CreateItem(win32com.client.constants.olMailItem)
+    msg.To = e_address
+    msg.Subject = "epic-trn%s Setup Notification" % env
+    msg.Body = "epic-trn%s has been setup for your class today" % env
+    # msg.Display()
+    msg.Send()
+    return
+
 # # # #
 
 
 if __name__ == "__main__":
-    import os
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    MyTrack = reload(MyTrack)
-
     schedule_class()

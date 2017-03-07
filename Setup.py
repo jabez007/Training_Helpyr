@@ -187,9 +187,10 @@ def assign_interconnects(_class, caches):
 
 
 def setup_cache(trns, code, flag=""):
-    if not Overlord.overlord(",".join(trns), code, flag):
-        LOGGER.error("Error running %s. See cache.err" % code)
-        return False
+    for trn in trns:
+        if not Overlord.overlord(trn, code, flag):
+            LOGGER.error("Error running %s. See cache.err" % code)
+            return False
     LOGGER.info("%s successfully ran in %s" % (code, ", ".join(trns)))
     return True
 
@@ -198,9 +199,13 @@ def setup_cache(trns, code, flag=""):
 
 if __name__ == "__main__":
     import datetime
+    import Outlook
+
     today = (datetime.datetime.now()).strftime("%m/%d/%Y")  # MM/DD/YYYY
     print("Setting up classes for %s:" % today)
+
     classes = MyTrack.setup_schedule(today)
     funds([_class[0] for _class in classes])
     for _class in classes:
-        print("\t%s" % _class[0])
+        print("\t%s - email to %s" % (_class[0], _class[1]))
+        Outlook.send_email(e_address=_class[1], env=_class[0])
