@@ -205,7 +205,10 @@ if __name__ == "__main__":
     print("Setting up classes for %s:" % today)
 
     classes = MyTrack.setup_schedule(today)
-    funds([_class[0] for _class in classes])
+    # funds([_class[0] for _class in classes])
     for _class in classes:
-        print("\t%s - email to %s" % (_class[0], _class[1]))
-        Outlook.send_email(e_address=_class[1], env=_class[0])
+        if funds([_class[0]]):
+            print("\t%s - email to %s" % (_class[0], _class[1]))
+            Outlook.send_email(e_address=_class[1], env=_class[0])
+        else:
+            print("\t%s failed" % _class[0])
