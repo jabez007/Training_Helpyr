@@ -53,7 +53,7 @@ def read_hdr(request_body):
     trainer = re.search('Created by:\s*([a-zA-Z]+ [a-zA-Z]+)\s', request_body)
     cache = re.search('to be set up:(.+?)\n+', request_body)
     start = re.search('Start date of class:(.+?)\n+', request_body)
-    end = re.search('End date of class:(.+?)\s', request_body)
+    end = re.search('End date of class:(.+?)\n+?', request_body)
     if cache and start and end:
         return ''.join(c for c in cache.group(1) if c.isdigit()), \
                start.group(1).strip(), \
