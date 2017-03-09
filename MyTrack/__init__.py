@@ -26,22 +26,7 @@ def init(config_f="config"):
 
     database.close()
 
-    instances = range(1, 51)  # Interconnects 1 through 50
-    existing = reconcile()
-    for c in existing:
-        for i in existing[c]:
-            assign(c, "train"+i[0], "epic-trn"+i[1])
-            if int(i[0]) in instances:
-                instances.remove(int(i[0]))
-    for i in instances:  # unassign what ever is left
-        if i > 40:
-            unassign("AMB_IP", "train"+str(i))
-        elif i == 1:
-            unassign("Instructors", "train0"+str(i))
-        elif i < 10:
-            unassign("CE500", "train0"+str(i))
-        else:
-            unassign("CE500", "train"+str(i))
+    reconcile()
 
 
 def open_database(db=os.path.join(TRACK_PATH, 'Interconnects.db')):
@@ -282,34 +267,37 @@ def get_instructor(_class):
 
 
 def reconcile():
-    PowerShell.get_webapplications()
+    instances = range(1, 51)  # Interconnects 1 through 50
+    web_apps = PowerShell.get_webapplications()
+    for app in web_apps:  # make sure existing setup is reflected in database
+        if app.cache < 10:
+            cache = "epic-trn0"+str(app.cache)
+        else:
+            cache = "epic-trn"+str(app.cache)
 
-    tables = {"Instructors": [],
-              "CE500": [],
-              "AMB_IP": []}
-    with open(os.path.join(PowerShell.PS_PATH, "results.csv"), 'r') as f:
-        reader = csv.reader(f)
-        line = 0
-        for row in reader:
-            if line == 0:  # skip BS at the top
-                line += 1
-                continue
-            elif line == 1:  # get indices for virtual path and physical path
-                line += 1
-                headers = row
-                vpath = headers.index("path")
-                ppath = headers.index("PhysicalPath")
-            elif line > 1:
-                cache = "".join([s for s in row[vpath] if s.isdigit()])
-                interconnect = "".join([s for s in row[ppath] if s.isdigit()])  # Can maybe do these better?
-                if int(interconnect) > 40:
-                    _class = "AMB_IP"
-                elif int(interconnect) == 1:
-                    _class = "Instructors"
-                else:
-                    _class = "CE500"
-                tables[_class].append((interconnect, cache))
-    return tables
+        interconnect = app.interconnect
+        if interconnect > 40:
+            assign("AMB_IP", "train"+str(interconnect), cache)
+        elif interconnect == 1:
+            assign("Instructors", "train0"+str(interconnect), cache)
+        elif interconnect < 10:
+            assign("CE500", "train0"+str(interconnect), cache)
+        else:
+            assign("CE500", "train"+str(interconnect), cache)
+
+        if app.interconnect in instances:
+            instances.remove(app.interconnect)
+
+    for i in instances:  # unassign what ever is left
+        if i > 40:
+            unassign("AMB_IP", "train"+str(i))
+        elif i == 1:
+            unassign("Instructors", "train0"+str(i))
+        elif i < 10:
+            unassign("CE500", "train0"+str(i))
+        else:
+            unassign("CE500", "train"+str(i))
+
 
 # # # #
 

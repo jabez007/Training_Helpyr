@@ -1,6 +1,7 @@
 import subprocess
 import os
 
+from WebApplication import WebApplication
 import Log
 
 PS_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -39,15 +40,22 @@ def cleanup(interconnect, cache):
 
 
 def get_webapplications():
+    web_applications = list()
     p = subprocess.Popen([r'powershell.exe',
                           '-ExecutionPolicy', 'Unrestricted',
                           r'.\Get-WebApplications.ps1'],
-                         cwd=PS_PATH)
+                         cwd=PS_PATH,
+                         stdout=subprocess.PIPE)
     result = p.wait()
+    ps_stdout = p.stdout.read()
+    for ps_out in ps_stdout.split("# # # #"):
+        if ps_out.strip():
+            web_app = WebApplication(ps_out)
+            web_applications.append(web_app)
     if int(result) != 0:
         log_error("Unable to retrieve IIS Web Applications from Interconnect server")
         return False
-    return True
+    return web_applications
 
 
 def update_app_pools():
