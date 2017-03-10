@@ -270,18 +270,13 @@ def reconcile():
     instances = range(1, 51)  # Interconnects 1 through 50
     web_apps = PowerShell.get_webapplications()
     for app in web_apps:  # make sure existing setup is reflected in database
-        if app.cache < 10:
-            cache = "epic-trn0"+str(app.cache)
-        else:
-            cache = "epic-trn"+str(app.cache)
+        cache = "epic-trn"+str(app.cache)
 
         interconnect = app.interconnect
         if interconnect > 40:
             assign("AMB_IP", "train"+str(interconnect), cache)
         elif interconnect == 1:
-            assign("Instructors", "train0"+str(interconnect), cache)
-        elif interconnect < 10:
-            assign("CE500", "train0"+str(interconnect), cache)
+            assign("Instructors", "train"+str(interconnect), cache)
         else:
             assign("CE500", "train"+str(interconnect), cache)
 
@@ -292,9 +287,7 @@ def reconcile():
         if i > 40:
             unassign("AMB_IP", "train"+str(i))
         elif i == 1:
-            unassign("Instructors", "train0"+str(i))
-        elif i < 10:
-            unassign("CE500", "train0"+str(i))
+            unassign("Instructors", "train"+str(i))
         else:
             unassign("CE500", "train"+str(i))
 
