@@ -32,4 +32,21 @@ class MyLog(logging.Logger):
         # add the handlers to the logger
         self.addHandler(handler)
 
+
+class MyReader(object):
+
+    def __init__(self, name=__name__, level="INFO", file_ext="log"):
+        level = level.upper()
+        self.log_filename = ""
+        filename = os.path.join(LOG_DIR, name, ".".join([level, file_ext]))
+        if os.path.isfile(filename):
+            self.log_filename = filename
+
+    def read(self):
+        if self.log_filename:
+            with open(self.log_filename, "r") as log_file:
+                log = [line.strip() for line in log_file.readlines()]
+            return "\n".join(reversed(log))
+        return ""
+
 # # # #

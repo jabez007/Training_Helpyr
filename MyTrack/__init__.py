@@ -59,9 +59,9 @@ def create_schedule(conn):
         else:
             return False
     else:
-        sql_add_column = 'ALTER TABLE Schedule\
-                                ADD COLUMN Trainer VARCHAR(255)'
-        try_sql(conn, sql_add_column)
+        # sql_add_column = 'ALTER TABLE Schedule\
+        #                      ADD COLUMN Trainer VARCHAR(255)'
+        # try_sql(conn, sql_add_column)
         return True
 
 
