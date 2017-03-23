@@ -8,6 +8,10 @@ OVERLORD_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 LOGGER = Log.MyLog(name=__name__)
 
 
+def ce_diags(env=""):
+    return overlord(env, tag="CSCDiag")
+
+
 def overlord(env="", tag="", params=""):
     workstation = "".join([s for s in os.environ['COMPUTERNAME'] if s.isdigit()])
     success = call(env,
@@ -15,6 +19,7 @@ def overlord(env="", tag="", params=""):
                    params,
                    workstation)
     if success:
+        LOGGER.info("%s successfully ran in %s" % (tag, env))
         return True
     else:
         log_error()

@@ -46,7 +46,7 @@ class MyReader(object):
         if self.log_filename:
             with open(self.log_filename, "r") as log_file:
                 log = [line.strip() for line in log_file.readlines()]
-            return "\n".join(reversed(log))
-        return ""
+            return reversed(log)
+        return [""]
 
 # # # #

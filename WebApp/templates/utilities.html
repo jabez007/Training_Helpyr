@@ -1,0 +1,14 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" name="utilities">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.restart_services }} {{ form.stop_services }}<br>
+    </p>
+    <p>
+        {{ form.overlord }}
+    </p>
+</form>
+{% endblock %}

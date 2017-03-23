@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for type, log in messages.iteritems() %}
+<div class="panel-heading">
+    <h4 class="panel-title">
+        <a data-toggle="collapse" href="#{{ type }}">{{ type }}</a>
+    </h4>
+</div>
+<div id="{{ type }}" class="panel-collapse collapse">
+    <ul class="list-group">
+        {% for entry in log %}
+        <li class="list-group-item">{{ entry }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+
+{% endblock %}

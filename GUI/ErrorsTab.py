@@ -48,11 +48,12 @@ class ErrorsTab(MyTab):
     def get_errors(self):
         for f in self.errors:
             if type(f) is str:
-                errors_text = Log.MyReader(name=f).read()
+                errors_text = "\n".join(Log.MyReader(name=f).read())
                 self.errors[f, "Text"].insert(END,
                                               errors_text)
+
                 if errors_text:
-                    width = max([len(s) for s in errors_text.split('\n')]) + 1
+                    width = max([len(s) for s in errors_text.split("\n")]) + 1
                     self.errors[f, "Text"].config(width=width)
 
     def on_refresh(self):

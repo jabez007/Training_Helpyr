@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" name="setup">
+    {{ form.hidden_tag() }}
+    {% if 'ce' in request.endpoint %}
+    <div class="form-group">
+        <label for="trainer">Please enter the Trainer environment for class</label>
+        {{ form.trainer(size=20) }}
+    </div>
+    {% endif %}
+    <div class="form-group">
+        <label for="caches">Please enter the Cache trainee environments to setup for class</label>
+        {{ form.caches }}
+        {% for error in form.caches.errors %}
+          <span style="color: red;">[ {{ error }} ]</span>
+        {% endfor %}<br>
+    </div>
+    {% if 'funds' in request.endpoint %}
+    <div class="form-group">
+        <label for="code">Please enter the Overlord code to run in each Cache environment for class</label>
+        {{ form.code(size=20) }}
+    </div>
+    {% endif %}
+    <button type="submit" class="btn btn-default">Setup</button>
+</form>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table style="width:100%; text-align:left" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Interconnect</th>
+            <th>Cache</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for env in environments %}
+        <tr>
+            <td>Interconnect-train{{ env.interconnect }}</td>
+            <td>epic-trn{{ env.cache }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

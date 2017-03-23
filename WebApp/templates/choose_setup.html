@@ -1,0 +1,11 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" name="utilities">
+    {{ form.hidden_tag() }}
+    Which class are you {% if 'setup' in request.endpoint %}setting{% else %}cleaning{% endif %} up environments for?<br>
+    {{ form.ce }}
+    {{ form.funds }}
+</form>
+{% endblock %}

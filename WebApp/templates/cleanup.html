@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" name="cleanup">
+    {{ form.hidden_tag() }}
+    {% if 'funds' in request.endpoint %}
+    <p>
+        Please select the Cache trainee environment to cleanup<br>
+        {{ form.caches }}
+        {% for error in form.caches.errors %}
+          <span style="color: red;">[ {{ error }} ]</span>
+        {% endfor %}<br>
+    </p>
+    <p>
+        {{ form.clean_one }}
+    </p>
+    {% endif %}
+    <p>
+        Cleanup all environments with one button<br>
+        {{ form.clean_all }}
+    </p>
+</form>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" name="overlord">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="tag">Please enter the Overlord Tag to run</label>
+        {{ form.tag(size=20) }}
+        {% for error in form.tag.errors %}
+          <span style="color: red;">[ {{ error }} ]</span>
+        {% endfor %} <button type="submit" class="btn btn-default">Run Tag</button>
+    </div>
+    <div class="form-group">
+        <label for="opt_vars">Please enter any additional (optional) variables to pass to the Overlord Tag</label>
+        {{ form.opt_vars(size=20) }}
+    </div>
+   <div class="form-group">
+        <label for="envs">Please enter the Cache environments to run the Tag in</label>
+        {{ form.envs }}
+        {% for error in form.envs.errors %}
+          <span style="color: red;">[ {{ error }} ]</span>
+        {% endfor %}<br>
+    </div>
+    <div class="form-group">
+        {{ form.ce_diags }}
+    </div>
+</form>
+{% endblock %}
