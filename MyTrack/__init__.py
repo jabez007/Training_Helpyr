@@ -191,6 +191,11 @@ def get(mode, table):
 
 
 def get_assigned(table):
+    """
+    
+    :param table: <string> CE500, AMB_IP, Instructors
+    :return: <list(tuple)> [(interconnect, cache)]
+    """
     database = open_database()
     sql_get = "SELECT * \
                FROM %s \
@@ -296,4 +301,4 @@ def reconcile():
 
 
 if __name__ == "__main__":
-    print TRACK_PATH
+    print get_assigned("AMB_IP")

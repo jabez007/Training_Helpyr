@@ -6,6 +6,7 @@ from .controls import *
 import Setup
 import PowerShell
 import Overlord
+import Cleanup
 import Log
 
 
@@ -134,10 +135,26 @@ def cleanup_funds():
     
     if cleanup.validate_on_submit():
         if cleanup.clean_one.data:
-            flash('Cleaning up epic-trn%s' %
-                  cleanup.caches.data)
+            interconnect = cleanup.caches.data
+            for pair in cleanup.envs:
+                if interconnect in pair:
+                    cache = pair[1]
+
+            if Cleanup.funds([(interconnect, cache)]):
+                flash('Cleaned up %s' %
+                      cache)
+            else:
+                flash("Failed to clean up %s" %
+                      cache)
+                return redirect(url_for('logs'))
+
         elif cleanup.clean_all.data:
-            flash('Cleaning up all Cache environments')
+            if Cleanup.funds(cleanup.envs):
+                flash('Cleaned up all Cache environments')
+            else:
+                flash('Failed to clean up all Cache environments')
+                return redirect(url_for('logs'))
+
         return redirect(url_for('current'))
     
     return render_template('cleanup.html', 
@@ -199,7 +216,7 @@ def logs():
                 'PowerShell': Log.MyReader(name='PowerShell').read(),
                 'Overlord': Log.MyReader(name='Overlord').read(),
                 'Phonebook': Log.MyReader(name='Phonebook').read(),
-                'Cleanup': Log.MyReader(name='Cleanup')}
+                'Cleanup': Log.MyReader(name='Cleanup').read()}
     return render_template('logs.html',
                            title='Logs',
                            messages=messages)

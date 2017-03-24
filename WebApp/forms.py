@@ -2,6 +2,8 @@ from flask_wtf import Form
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 
+import MyTrack
+
 
 class SetupForm(Form):  # only one field can have validators?
     trainer = StringField('trainer')
@@ -15,9 +17,7 @@ class SetupChoiceForm(Form):
 
 
 class CleanupForm(Form):
-    envs = [("41", "epic-trn41"),
-            ("42", "epic-trn42"),
-            ("43", "epic-trn43")]
+    envs = [pairs for pairs in MyTrack.get_assigned("AMB_IP")]
     caches = SelectField(choices=envs)
     clean_one = SubmitField('Cleanup')
     clean_all = SubmitField('Cleanup All')

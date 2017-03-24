@@ -43,23 +43,31 @@ def funds(trainees):
 def unassign_interconnects(_class, trns):
     """
 
-    :param _class:
-    :param trns: <tuple> (interconnect, cache)
+    :param _class: <string>
+    :param trns: <list(tuple)> [(interconnect, cache)]
     :return:
     """
+    total_success = True
     for trn in trns:
+        this_success = True
         if trn:
             interconnect = "".join([s for s in trn[0] if s.isdigit()])
             cache = "".join([s for s in trn[1] if s.isdigit()])
 
             if not PowerShell.cleanup(interconnect, cache):
                 LOGGER.error("Failed clean-up: train%s still connected to epic-trn%s" % (interconnect, cache))
-                # return False
+                total_success = False
+                this_success = False
         
             if not MyTrack.unassign(_class, "train"+interconnect):
                 LOGGER.error("Failed to save change to database: train%s still taken by epic-trn%s" % (interconnect, cache))
+                total_success = False
+                this_success = False
 
-    return True
+            if this_success:
+                LOGGER.info("epic-trn%s successfully cleaned up" % cache)
+
+    return total_success
 
 
 # # # #

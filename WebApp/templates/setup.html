@@ -11,7 +11,7 @@
     {% endif %}
     <div class="form-group">
         <label for="caches">Please enter the Cache trainee environments to setup for class</label>
-        {{ form.caches }}
+        {{ form.caches(cols="25", rows="20") }}
         {% for error in form.caches.errors %}
           <span style="color: red;">[ {{ error }} ]</span>
         {% endfor %}<br>

@@ -203,7 +203,7 @@ def assign_interconnects(_class, trns):
             LOGGER.error("No Interconnect returned from MyTrack for epic-trn%s" % cache)
             return None
 
-        LOGGER.debug("epic-trn%s connected to Interconnect-train%s" % (cache, interconnect))
+        LOGGER.info("epic-trn%s connected to Interconnect-train%s" % (cache, interconnect))
 
     return pairs
 
@@ -213,7 +213,7 @@ def setup_cache(trns, code, flag=""):
         if not Overlord.overlord(trn, code, flag):
             LOGGER.error("Error running %s. See cache.err" % code)
             return False
-    LOGGER.info("%s successfully ran in %s" % (code, ", ".join(trns)))
+    # LOGGER.info("%s successfully ran in %s" % (code, ", ".join(trns)))
     return True
 
 # # # #
