@@ -113,26 +113,13 @@ class SetupTab(MyTab):
 
         # End Setup Button Frame
 
-    def get_setup_environments(self):
-        caches_text = self.setup_environments.get(1.0, END).strip()
-
-        caches_split_newline = caches_text.split('\n')
-        caches_split_comma = caches_text.split(',')
-
-        if len(caches_split_comma) > len(caches_split_newline):
-            caches = caches_split_comma
-        else:
-            caches = caches_split_newline
-
-        return caches
-
     def on_setup(self):
         title = "Setup"
         result = None
 
         _class = self.classes[self.selected_class.get()]
-        instructor = "".join([s for s in self.instructor_environment.get() if s.isdigit()])
-        caches = self.get_setup_environments()
+        instructor = self.instructor_environment.get()
+        caches = self.setup_environments.get(1.0, END).strip()
         overlord = self.overlord_code.get()
 
         if not _class:

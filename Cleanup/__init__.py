@@ -1,3 +1,9 @@
+import os
+APP_PATH = os.path.join(*os.path.split(os.path.dirname(os.path.realpath(__file__)))[:-1])
+import sys
+if APP_PATH not in sys.path:
+    sys.path.append(APP_PATH)
+
 import PowerShell
 import MyTrack
 import Phonebook
@@ -61,8 +67,10 @@ def unassign_interconnects(_class, trns):
 
 if __name__ == "__main__":
     import datetime
+
     yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%m/%d/%Y")  # MM/DD/YYYY
     print("Cleaning up classes from %s:" % yesterday)
+
     classes = MyTrack.cleanup_schedule(yesterday)
     funds([MyTrack.get_funds("epic-trn"+_class[0]) for _class in classes])
     for _class in classes:

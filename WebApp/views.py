@@ -2,6 +2,8 @@ from flask import *
 from WebApp import app
 from .forms import *
 from .controls import *
+
+import Setup
 import PowerShell
 import Overlord
 import Log

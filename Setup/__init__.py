@@ -1,3 +1,10 @@
+import re
+import os
+APP_PATH = os.path.join(*os.path.split(os.path.dirname(os.path.realpath(__file__)))[:-1])
+import sys
+if APP_PATH not in sys.path:
+    sys.path.append(APP_PATH)
+
 import MyTrack
 import PowerShell
 import Phonebook
@@ -16,37 +23,38 @@ def ce500(instructor, trainees, code="CSCce500setup"):
     """
     entry point for setting up CE 101 (FKA CE500)
     :param instructor: <string> the cache environment for the Instructor
-    :param trainees: <list(string)> the cache environments for the trainees
+    :param trainees: <string> the cache environments for the trainees
     :param code: <string> the Overlord tag the needs to be ran in each environment to complete setup
     :return: <bool> True if everything was successful
     """
     gwn = None
-    trainees = clean_caches(trainees)
+    instr = "".join([c for c in instructor if c.isdigit()])
+    trns = clean_caches(trainees)
 
-    if instructor:
+    if instr:
         '''
         if this is a fresh class setup, as in we are not just adding trainee environments to an existing class
         '''
         # pull out the last trainee environment and make it GWN
-        gwn = trainees[-1:]
+        gwn = trns[-1:]
         if gwen(gwn):
             # then take that environment out of the list we'll set up later
-            trainees = trainees[:-1]
+            trns = trns[:-1]
             LOGGER.info("epic-trn%s set up as GWN environment" % gwn[0])
         else:
             # otherwise, skip the GWN setup and make this a normal environment
             gwn = None
             LOGGER.error("Galaxy Wide Network not set up")
 
-        setup_instructor(instructor)
+        setup_instructor(instr)
 
     # Connect Interconnects to trainee environments
-    environment_pairs = assign_interconnects("CE500", trainees)
+    environment_pairs = assign_interconnects("CE500", trns)
     if environment_pairs is None:
         return False
 
     # Update Training Phone Book with new environment assignments
-    if not update_phonebook(trainees):
+    if not update_phonebook(trns):
         return False
 
     # Restart the Training Phone Book so our changes take affect
@@ -55,7 +63,7 @@ def ce500(instructor, trainees, code="CSCce500setup"):
         return False
 
     # Run Cache setup script
-    if not setup_cache([instructor]+trainees, code):
+    if not setup_cache([instr]+trns, code):
         return False
     if gwn is not None:
         setup_cache(gwn, code, "GWeN")
@@ -124,13 +132,19 @@ Generic Care Everywhere setup for IP and AMB Funds classes
 
 
 def funds(caches, code="CSCInpFunds"):
-    caches = clean_caches(caches)
+    """
+    
+    :param caches: <string> 
+    :param code: <string>
+    :return: <bool>
+    """
+    trns = clean_caches(caches)
 
-    if not assign_interconnects("AMB_IP", caches):
+    if not assign_interconnects("AMB_IP", trns):
         return False
 
     if code:
-        if not setup_cache(caches, code):
+        if not setup_cache(trns, code):
             return False
 
     return True
@@ -142,21 +156,29 @@ used by both Care Everywhere 101 and IP/AMB Funds
 
 
 def clean_caches(caches):
+    """
+    uses regex to parse out our cache environments passed in
+    :param caches: <string> 
+    :return: <list(string)>
+    """
+
     return_caches = list()
-    for c in caches:
-        if c:  # Filter out blank lines
-            cache = "".join([s for s in c if s.isdigit()])
-            if cache:  # double check for blank lines
-                return_caches.append(cache)
+
+    data = re.finditer("([a-zA-Z0-9\-]+)", caches)
+    for d in data:
+        cache = "".join([s for s in d.group(1) if s.isdigit()])
+        if cache:
+            return_caches.append(cache)
+
     return return_caches
 
 
-def assign_interconnects(_class, caches):
+def assign_interconnects(_class, trns):
     pairs = list()  # [(cache1, interconnect1), (cache2, interconnect2), ...]
 
     assigned_interconnects = 1  # CE500 instructor always gets Interconnect 1
     clss = _class
-    for cache in caches:
+    for cache in trns:
         # #
         if ("CE500" in _class) and (assigned_interconnects >= 40):  # if training overbooks us, steal from FUNDs
             clss = "AMB_IP"
@@ -205,10 +227,9 @@ if __name__ == "__main__":
     print("Setting up classes for %s:" % today)
 
     classes = MyTrack.setup_schedule(today)
-    # funds([_class[0] for _class in classes])
-    for _class in classes:
-        if funds([_class[0]]):
-            print("\t%s - email to %s" % (_class[0], _class[1]))
-            Outlook.send_email(e_address=_class[1], env=_class[0])
+    for new_class in classes:
+        if funds(new_class[0]):
+            print("\t%s - email to %s" % (new_class[0], new_class[1]))
+            Outlook.send_email(e_address=new_class[1], env=new_class[0])
         else:
-            print("\t%s failed" % _class[0])
+            print("\t%s failed" % new_class[0])
