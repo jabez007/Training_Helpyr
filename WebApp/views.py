@@ -1,5 +1,5 @@
 from flask import *
-from WebApp import app
+from WebApp import app, app_logger
 from .forms import *
 from .controls import *
 
@@ -77,9 +77,20 @@ def setup_funds():
     setup = SetupForm()
     
     if setup.validate_on_submit():
-        flash('Setup requested for Caches: "%s"' %
-              setup.caches.data)
-        return redirect(url_for('current'))
+        cache_envs = setup.caches.data
+        overlord_tag = setup.code.data
+
+        app_logger.info("Setup requested for %s using Overlord tag %s" %
+                        (cache_envs, overlord_tag))
+
+        if Setup.funds(cache_envs):
+            flash('Setup successful for: "%s"' %
+                  cache_envs)
+            return redirect(url_for('current'))
+        else:
+            flash('Setup failed for: "%s"' %
+                  cache_envs)
+            return redirect(url_for('logs'))
     
     return render_template('setup.html', 
                            title='Funds Setup',
