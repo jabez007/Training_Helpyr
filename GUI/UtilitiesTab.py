@@ -160,21 +160,8 @@ class UtilitiesTab(MyTab):
             Box.showerror("PowerShell",
                           "PowerShell encountered an error\nSee powershell.err for more details")
 
-    def get_overlord_environments(self):
-        caches_text = self.overlord_environments.get(1.0, END).strip()
-
-        caches_split_newline = caches_text.split('\n')
-        caches_split_comma = caches_text.split(',')
-
-        if len(caches_split_comma) > len(caches_split_newline):
-            caches = caches_split_comma
-        else:
-            caches = caches_split_newline
-
-        return ",".join(caches)
-
     def on_overlord(self):
-        environments = self.get_overlord_environments()
+        environments = self.overlord_environments.get(1.0, END).strip()
         overlord_tag = self.overlord_tag.get().strip()
         overlord_optvars = self.overlord_optvars.get().strip()
 
