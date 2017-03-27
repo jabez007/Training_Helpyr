@@ -40,6 +40,11 @@ def remove_in_use():
     CUR_SESSIONS[sid] = False
 
 
+def get_current_session_ip():
+    sid = get_current_session()
+    return SESSION_IP[sid]
+
+
 def get_current_session():
     sid = session.get('id')
     if sid is not None:

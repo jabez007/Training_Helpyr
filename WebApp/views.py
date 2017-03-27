@@ -64,9 +64,17 @@ def setup_ce():
     setup = SetupForm()
     
     if setup.validate_on_submit():
-        flash('Setup requested for Trainer: "%s" and Caches: "%s"' %
-              (setup.trainer.data, setup.caches.data))
-        return redirect(url_for('current'))
+        trainer = setup.trainer.data
+        trainees = setup.caches.data
+
+        if Setup.ce500(trainer, trainees):
+            app_logger.info("%s setup %s (trainer) and (trainees) %s" % (get_current_session_ip(), trainer, trainees))
+            flash('CE setup successful for Trainer: "%s" and Caches: "%s"' %
+                  (setup.trainer.data, setup.caches.data))
+            return redirect(url_for('current'))
+        else:
+            flash("CE setup failed")
+            return redirect(url_for('logs'))
     
     return render_template('setup.html', 
                            title='CE Setup',
@@ -81,10 +89,9 @@ def setup_funds():
         cache_envs = setup.caches.data
         overlord_tag = setup.code.data
 
-        app_logger.info("Setup requested for %s using Overlord tag %s" %
-                        (cache_envs, overlord_tag))
-
         if Setup.funds(cache_envs):
+            app_logger.info("%s setup %s using Overlord tag %s" %
+                            (get_current_session_ip(), cache_envs, overlord_tag))
             flash('Setup successful for: "%s"' %
                   cache_envs)
             return redirect(url_for('current'))
@@ -141,6 +148,7 @@ def cleanup_funds():
                     cache = pair[1]
 
             if Cleanup.funds([(interconnect, cache)]):
+                app_logger.info("%s cleaned up %s" % (get_current_session_ip(), cache))
                 flash('Cleaned up %s' %
                       cache)
             else:
@@ -150,6 +158,7 @@ def cleanup_funds():
 
         elif cleanup.clean_all.data:
             if Cleanup.funds(cleanup.envs):
+                app_logger("%s cleaned up all cache environments for funds" % get_current_session_ip())
                 flash('Cleaned up all Cache environments')
             else:
                 flash('Failed to clean up all Cache environments')
@@ -171,18 +180,23 @@ def utilities():
     
     if form.validate_on_submit():
         if form.restart_services.data:
-            flash('Restarted Services')
-            PowerShell.restart_services()
+            app_logger.info("%s restarting Interconnect services" % get_current_session_ip())
+            success = PowerShell.restart_services()
 
         elif form.stop_services.data:
-            flash('Stopped Services')
-            PowerShell.stop_services()
+            app_logger.info("%s stopping Interconnect services" % get_current_session_ip())
+            success = PowerShell.stop_services()
 
         elif form.overlord.data:
             return redirect(url_for('overlord'))
-        
-        return redirect(url_for('current'))
-    
+
+        if success:
+            flash("PowerShell successfully executed.")
+            return redirect(url_for('current'))
+        else:
+            flash("Error executing PowerShell")
+            return redirect(url_for('logs'))
+
     return render_template('utilities.html', 
                            title='Utilities',
                            form=form)
@@ -194,13 +208,23 @@ def overlord():
     
     if form.validate_on_submit():
         environments = form.envs.data
+        tag = form.tag.data
+        opt_vars = form.opt_vars.data
 
-        # if form.ce_diags.data:
-            # Overlord.ce_diags()
+        if form.ce_diags.data:
+            app_logger.info("%s running CSCDiag in %s" % (get_current_session_ip(), environments))
+            success = Overlord.ce_diags(environments)
 
-        flash('Overlord executed in %s' % environments)
+        else:
+            app_logger.info("%s running %s in %s" % (get_current_session_ip(), tag, environments))
+            success = Overlord.overlord(environments, tag, opt_vars)
 
-        return redirect(url_for('current'))
+        if success:
+            flash('Overlord executed in %s' % environments)
+            return redirect(url_for('current'))
+        else:
+            flash('Error executing Overlord in %s' % environments)
+            return redirect(url_for('logs'))
     
     return render_template('overlord.html', 
                            title='Overlord',
