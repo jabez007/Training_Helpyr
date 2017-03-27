@@ -139,7 +139,7 @@ def format_time(time_string):
         unit_string = epic_time.group(1).upper()
         operator = epic_time.group(2)
         amount_change = epic_time.group(3)
-        print unit_string, operator, amount_change
+        # print unit_string, operator, amount_change
 
         if unit_string == "T":
             time_unit = "days"
