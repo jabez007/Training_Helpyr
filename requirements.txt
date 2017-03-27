@@ -1,2 +1,4 @@
-flask
-flask-wtf
+Flask==0.12
+Flask_WTF==0.14.2
+pypyodbc==1.3.4
+WTForms==2.1

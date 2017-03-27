@@ -134,6 +134,28 @@ def format_time(time_string):
     except ValueError:
         pass
 
+    epic_time = re.search("(^[tTwW])\s*([\-+]*)\s*([0-9]*)$", time_string.strip())
+    if epic_time:
+        unit_string = epic_time.group(1).upper()
+        operator = epic_time.group(2)
+        amount_change = epic_time.group(3)
+        print unit_string, operator, amount_change
+
+        if unit_string == "T":
+            time_unit = "days"
+        elif unit_string == "W":
+            time_unit = "weeks"
+
+        if operator and amount_change:
+            operator_string = '%s datetime.timedelta(%s=%s)' % (operator, time_unit, amount_change)
+        else:
+            operator_string = ""
+
+        exec_string = 'time_tuple = datetime.datetime.now() %s' % operator_string
+
+        exec exec_string
+        return time_tuple.strftime(time_format)
+
 
 def send_email(e_address, env):
     outlook = win32com.client.gencache.EnsureDispatch("Outlook.Application")
@@ -151,4 +173,5 @@ def send_email(e_address, env):
 
 
 if __name__ == "__main__":
+    # print format_time("w+12")
     schedule_class()
