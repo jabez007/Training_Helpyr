@@ -21,6 +21,7 @@ def setup(interconnect, cache):
             err_msg = err.read().decode("utf16").strip()  # can't decode byte 0xff
         log_error("Failed to setup Interconnect-train%s with epic-trn%s: %s" % (interconnect, cache, err_msg))
         return False
+    LOGGER.info("Interconnect-train%s connected to epic-trn%s" % (interconnect, cache))
     return True
 
 
@@ -36,6 +37,7 @@ def cleanup(interconnect, cache):
         log_error("Failed to stop Interconnect-train%s service and remove Interconnect-train%s IIS directory"
                   % (interconnect, cache))
         return False
+    LOGGER.info("Interconnect-train%s stopped and removed" % interconnect)
     return True
 
 
@@ -50,6 +52,7 @@ def get_webapplications():
     for ps_out in ps_stdout.split("# # # #"):
         if ps_out.strip():
             web_app = WebApplication(ps_out)
+            LOGGER.info("WebApplication found for %s" % web_app)
             web_applications.append(web_app)
     if not ps_stdout:
         log_error("Unable to retrieve IIS Web Applications from Interconnect server")
@@ -66,6 +69,7 @@ def update_app_pools():
     if int(result) != 0:
         log_error("Unable to update Interconnect Application Pools")
         return False
+    LOGGER.info("App Pools for Interconnects updated")
     return True
 
 
@@ -78,6 +82,7 @@ def restart_services():
     if int(result) != 0:
         log_error("Unable to restart Interconnect-train* services")
         return False
+    LOGGER.info("Interconnect-train* services restarted")
     return True
 
 
@@ -90,6 +95,7 @@ def stop_services():
     if int(result) != 0:
         log_error("Unable to stop Interconnect-train* services")
         return False
+    LOGGER.info("Interconnect-train* services stopped")
     return True
 
 
@@ -102,6 +108,7 @@ def restart_phonebook():
     if int(result) != 0:
         log_error("Training Phonebook service not restarted")
         return False
+    LOGGER.info("Training Phonebook service restarted")
     return True
 
 
