@@ -15,7 +15,7 @@ class WebApplication(object):
             self.interconnect = InternalInt("".join(c for c in physical.group(1) if c.isdigit()))
 
     def __str__(self):
-        return "%s | %s" % (self.interconnect, self.cache)
+        return "Interconnect-train%s | epic-trn%s" % (self.interconnect, self.cache)
 
 
 class InternalInt(int):
