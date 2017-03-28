@@ -209,12 +209,13 @@ def assign_interconnects(_class, trns):
 
 
 def setup_cache(trns, code, flag=""):
+    success = True
     for trn in trns:
         if not Overlord.overlord(trn, code, flag):
-            LOGGER.error("Error running %s. See cache.err" % code)
-            return False
+            LOGGER.error("Error running %s. See Overlord logs" % code)
+            success = False
     # LOGGER.info("%s successfully ran in %s" % (code, ", ".join(trns)))
-    return True
+    return success
 
 # # # #
 
