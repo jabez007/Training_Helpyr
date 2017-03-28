@@ -16,7 +16,7 @@
     </div>
    <div class="form-group">
         <label for="envs">Please enter the Cache environments to run the Tag in</label>
-        {{ form.envs }}
+        {{ form.envs(cols="25", rows="20") }}
         {% for error in form.envs.errors %}
           <span style="color: red;">[ {{ error }} ]</span>
         {% endfor %}<br>
