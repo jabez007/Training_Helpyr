@@ -13,6 +13,10 @@ def ce_diags(env=""):
     return overlord(env, tag="CSCDiag")
 
 
+def ce_gateway_config(env=""):
+    return overlord(env, tag="CSCPrepGatewayConfig")
+
+
 def overlord(env="", tag="", params=""):
     workstation = "".join([s for s in os.environ['COMPUTERNAME'] if s.isdigit()])
     success = call(clean_caches(env),

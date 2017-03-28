@@ -214,6 +214,9 @@ def overlord():
         if form.ce_diags.data:
             app_logger.info("%s running CSCDiag in %s" % (get_current_session_ip(), environments))
             success = Overlord.ce_diags(environments)
+        elif form.ce_gateway_config:
+            app_logger.info("%s running CSCPrepGatewayConfig in %s" % (get_current_session_ip(), environments))
+            success = Overlord.ce_diags(environments)
 
         else:
             app_logger.info("%s running %s in %s" % (get_current_session_ip(), tag, environments))
