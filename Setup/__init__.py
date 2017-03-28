@@ -224,10 +224,10 @@ if __name__ == "__main__":
     import datetime
     import Outlook
 
-    today = (datetime.datetime.now()).strftime("%m/%d/%Y")  # MM/DD/YYYY
-    print("Setting up classes for %s:" % today)
+    tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%m/%d/%Y")  # MM/DD/YYYY
+    print("Setting up classes for %s:" % tomorrow)
 
-    classes = MyTrack.setup_schedule(today)
+    classes = MyTrack.setup_schedule(tomorrow)
     for new_class in classes:
         if funds(new_class[0]):
             print("\t%s - email to %s" % (new_class[0], new_class[1]))
