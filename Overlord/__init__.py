@@ -20,7 +20,7 @@ def overlord(env="", tag="", params=""):
                    params,
                    workstation)
     if success:
-        LOGGER.info("%s successfully ran in %s" % (tag, env))
+        LOGGER.info("%s(%s) successfully ran in %s" % (tag, params, env))
         return True
     else:
         log_error()
