@@ -7,6 +7,7 @@ import Setup
 import PowerShell
 import Overlord
 import Cleanup
+import MyTrack
 import Log
 
 
@@ -128,8 +129,17 @@ def cleanup_ce():
     cleanup = CleanupForm()
     
     if cleanup.is_submitted():
-        flash('Cleaning up CE class')
-        return redirect(url_for('current'))
+        instructor = MyTrack.get_instructor("CE500")
+        # print instructor
+        trainees = MyTrack.get_assigned("CE500")
+        # print trainees
+
+        if Cleanup.ce500(instructor, trainees):
+            flash('Cleaned up CE class')
+            return redirect(url_for('current'))
+        else:
+            flash('Error occurred while cleaning up CE500')
+            return redirect(url_for('logs'))
     
     return render_template('cleanup.html', 
                            title='CE Cleanup',

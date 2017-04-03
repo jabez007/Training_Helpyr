@@ -13,13 +13,16 @@ LOGGER = Log.MyLog(name=__name__)
 
 
 def ce500(instructor, trainees):
-    if instructor:
-        if not PowerShell.cleanup('01', instructor):
-            LOGGER.error("Failed to clean-up: CE500 instructor Interconnect still connected to epic-trn%s" % instructor)
+    instrc = "".join([c for c in instructor if c.isdigit()])
+
+    if instrc:
+        if not PowerShell.cleanup('01', instrc):
+            LOGGER.error("Failed to clean-up: CE500 instructor Interconnect still connected to epic-trn%s" % instrc)
             return False
         
         if not MyTrack.unassign("Instructors", "train01"):
-            LOGGER.error("Failed to save change to database: CE500 instructor Interconnect still taken by epic-trn%s" % instructor)
+            LOGGER.error("Failed to save change to database: CE500 instructor Interconnect still taken by epic-trn%s"
+                         % instrc)
 
         if not Phonebook.TrnPhonebook().reset():
             LOGGER.error("Training Phonebook not reset")
