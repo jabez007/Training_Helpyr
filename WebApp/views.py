@@ -47,6 +47,7 @@ def current():
 ####
 @app.route('/setup', methods=['GET', 'POST'])
 def choose_setup():
+    MyTrack.init()
     choose = SetupChoiceForm()
     
     if choose.validate_on_submit():
@@ -110,7 +111,8 @@ def setup_funds():
 # Cleanup Existing environments
 ####
 @app.route('/cleanup', methods=['GET', 'POST'])
-def choose_cleanup():    
+def choose_cleanup():
+    MyTrack.init()
     choose = SetupChoiceForm()
     
     if choose.validate_on_submit():
