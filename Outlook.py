@@ -5,6 +5,9 @@ import datetime
 import pywintypes
 
 import MyTrack
+from Log import MyLog
+
+LOGGER = MyLog(name="Outlook")
 
 
 def find_requests():
@@ -15,6 +18,8 @@ def find_requests():
     else:
         # just search back to yesterday
         back_to = pywintypes.Time((datetime.datetime.now() - datetime.timedelta(days=1)).timetuple())
+
+    LOGGER.info("Searching HDRs that came in since %s" % back_to)
 
     obj = win32com.client.Dispatch("Outlook.Application")
     outlook = obj.GetNamespace("MAPI")
@@ -29,6 +34,9 @@ def find_requests():
     for request in hdr_requests:
         if request.ReceivedTime >= back_to:  # received in the last 24 hours
             hdr = read_hdr(request.Body)
+
+            LOGGER.info("Found %s" % str(hdr))
+
             requested_environments.append(hdr)
             request.UnRead = False
             request.Save()
