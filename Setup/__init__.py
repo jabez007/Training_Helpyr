@@ -49,8 +49,7 @@ def ce500(instructor, trainees, code="CSCce500setup"):
         setup_instructor(instr)
 
     # Connect Interconnects to trainee environments
-    environment_pairs = assign_interconnects("CE500", trns)
-    if environment_pairs is None:
+    if not assign_interconnects("CE500", trns):
         return False
 
     # Update Training Phone Book with new environment assignments
@@ -167,15 +166,14 @@ def clean_caches(caches):
     data = re.finditer("([a-zA-Z0-9\-]+)", caches)
     for d in data:
         cache = "".join([s for s in d.group(1) if s.isdigit()])
-        if cache:
+        # make sure we have an environment and that it's not already assigned
+        if cache and not MyTrack.check_assigned(cache):
             return_caches.append(cache)
 
     return return_caches
 
 
 def assign_interconnects(_class, trns):
-    pairs = list()  # [(cache1, interconnect1), (cache2, interconnect2), ...]
-
     assigned_interconnects = 1  # CE500 instructor always gets Interconnect 1
     clss = _class
     for cache in trns:
@@ -190,22 +188,21 @@ def assign_interconnects(_class, trns):
         if interconnect:
             if not PowerShell.setup(interconnect, cache):
                 LOGGER.error("Powershell failed to connect epic-trn%s to train%s" % (cache, interconnect))
-                return None
+                return False
 
             assigned_interconnects += 1
-            pairs.append((cache, interconnect))
 
             if not MyTrack.assign(clss, "train"+interconnect, "epic-trn"+cache):
                 LOGGER.error("Setup between epic-trn%s and train%s not saved to MyTrack" % (cache, interconnect))
-                return None
+                return False
 
         else:
             LOGGER.error("No Interconnect returned from MyTrack for epic-trn%s" % cache)
-            return None
+            return False
 
         LOGGER.info("epic-trn%s connected to Interconnect-train%s" % (cache, interconnect))
 
-    return pairs
+    return True
 
 
 def setup_cache(trns, code, flag=""):
@@ -224,13 +221,14 @@ if __name__ == "__main__":
     import datetime
     import Outlook
 
-    tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%m/%d/%Y")  # MM/DD/YYYY
-    print("Setting up classes for %s:" % tomorrow)
+    for days in range(2):  # setup today's and tomorrow's classes
+        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=days)).strftime("%m/%d/%Y")  # MM/DD/YYYY
+        print("Setting up classes for %s:" % tomorrow)
 
-    classes = MyTrack.setup_schedule(tomorrow)
-    for new_class in classes:
-        if funds(new_class[0]):
-            print("\t%s - email to %s" % (new_class[0], new_class[1]))
-            Outlook.send_email(e_address=new_class[1], env=new_class[0])
-        else:
-            print("\t%s failed" % new_class[0])
+        classes = MyTrack.setup_schedule(tomorrow)
+        for new_class in classes:
+            if funds(new_class[0]):
+                print("\t%s - email to %s" % (new_class[0], new_class[1]))
+                Outlook.send_email(e_address=new_class[1], env=new_class[0])
+            else:
+                print("\t%s failed" % new_class[0])

@@ -183,6 +183,22 @@ def try_sql(conn, sql_string):
         return False
 
 
+def check_assigned(cache):
+    assigned = False
+
+    databse = open_database()
+    for tbl in ["CE500", "AMB_IP", "Instructors"]:
+        sql_check = "SELECT * \
+                      FROM %s \
+                      WHERE Cache='epic-trn%s'" % (tbl, cache)
+        results = databse.execute(sql_check).fetchall()
+        if len(results) > 0:
+            assigned = True
+            break
+
+    return assigned
+
+
 def get(mode, table):
     if str(mode).upper() in ["ASSIGNED", "1"]:
         return get_assigned(table)
@@ -301,4 +317,4 @@ def reconcile():
 
 
 if __name__ == "__main__":
-    print get_assigned("AMB_IP")
+    print check_assigned(222)
