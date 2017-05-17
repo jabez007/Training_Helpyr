@@ -170,7 +170,7 @@ def cleanup_funds():
 
         elif cleanup.clean_all.data:
             if Cleanup.funds(cleanup.envs):
-                app_logger("%s cleaned up all cache environments for funds" % get_current_session_ip())
+                app_logger.info("%s cleaned up all cache environments for funds" % get_current_session_ip())
                 flash('Cleaned up all Cache environments')
             else:
                 flash('Failed to clean up all Cache environments')
