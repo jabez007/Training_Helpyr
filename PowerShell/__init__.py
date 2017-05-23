@@ -56,7 +56,7 @@ def get_webapplications():
             web_applications.append(web_app)
     if not ps_stdout:
         log_error("Unable to retrieve IIS Web Applications from Interconnect server")
-        return False
+        return list()
     LOGGER.info("Current WebApplications found.")
     return web_applications
 
